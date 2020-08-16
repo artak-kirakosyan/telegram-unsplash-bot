@@ -1,20 +1,16 @@
 #!/usr/bin/env python
-
 try:
     import json
     import time
     from datetime import datetime
     from threading import Thread
     import requests
-
     from common import get_logger
     from telegram import Bot, ParseMode
 except ImportError as e:
     print(f'Error occured during import: {e}')
     print('Please install all necessary libraries and try again')
     exit(1)
-
-
 class UnsplashClient():
     def __init__(self, config_path):
         with open(config_path, "r") as f:
@@ -27,7 +23,6 @@ class UnsplashClient():
                 print(f"Failed to open the file: {e}")
                 exit(1)
         self._from_config_dict(configs)
-
     def _from_config_dict(self, config_dict):
         self._configs = config_dict
         self._logger = get_logger(
@@ -50,10 +45,11 @@ class UnsplashClient():
             result: json or plain text response
         """
         # Check if we still have available resources to API
-        if self.requests_left <= 0:
-            self._logger.warning("Request limit reached")
-            raise RuntimeError("Requests limit reached, please wait an hour")
-
+        #if self.requests_left <= 0:
+        #    self._logger.warning("Request limit reached")
+        #    raise RuntimeError("Requests limit reached, please wait an hour")
+        # The above method is not good because once the limit reaches 0, 
+        #it will never make new requests to get a new value
         # Make the request
         self._logger.info(f"Making a request to: {request_url}")
         try:
@@ -63,13 +59,14 @@ class UnsplashClient():
             raise RuntimeError("Error occured during the response")
         # Update the limitation count
         self.requests_left = int(resp.headers['X-Ratelimit-Remaining'])
+        print(resp.text)
         if resp.ok:
             if resp_type == 'json':
                 result = json.loads(resp.text)
             else:
                 result = resp
         else:
-            result = {}
+            raise RuntimeError(f"Response not okay: {resp.status_code}, {resp.text}")
         self._logger.info("All done, returning response")
         return result
     
