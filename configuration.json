@@ -1,0 +1,64 @@
+{
+    "access_key": "0OkiBEpNR1xpPpD36K8zth4F0THEv-9vBYmOfF_CgaM",
+    "secret_key": "8WUh0ibEIcfZPAuHQra_bXgv7KmGp2pSb3c2z8H46CU",
+    "base_url": "https://api.unsplash.com",
+    "request_limit": 50,
+    "datetime_format": "%Y-%m-%dT%H:%M:%S",
+    "feature_names": {
+        "_id": {
+            "feature_name": "id",
+            "is_date": false,
+            "is_mandatory": true
+        },
+        "uri": {
+            "feature_name": "urls/regular",
+            "is_date": true,
+            "is_mandatory": true
+        },
+        "created_at": {
+            "feature_name": "created_at",
+            "is_date": true,
+            "is_mandatory": false
+        },
+        "updated_at": {
+            "feature_name": "updated_at",
+            "is_date": true,
+            "is_mandatory": false
+        },
+        "promoted_at": {
+            "feature_name": "promoted_at",
+            "is_date": true,
+            "is_mandatory": false
+        },
+        "width": {
+            "feature_name": "width",
+            "is_date": false, 
+            "is_mandatory": false
+        },
+        "height": {
+            "feature_name": "height",
+            "is_date": false,
+            "is_mandatory": false
+        },
+       "color": {
+           "feature_name": "color",
+           "is_date": false, 
+           "is_mandatory": false
+       },
+        "urls": {
+            "feature_name": "urls",
+            "is_date": false,
+            "is_mandatory": true
+        },
+        "views": {
+            "feature_name": "views",
+            "is_date": false,
+            "is_mandatory": false
+        },
+        "likes": {
+            "feature_name": "likes",
+            "is_date": false,
+            "is_mandatory": false
+        }
+    }
+}

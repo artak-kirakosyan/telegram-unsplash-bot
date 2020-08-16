@@ -1,0 +1,6 @@
+2020-08-16 15:57:14,179: INFO: UNSPLASH: Unsplash client created
+2020-08-16 15:57:14,985: INFO: UNSPLASH: Creating request url
+2020-08-16 15:57:14,987: INFO: UNSPLASH: Request url ready
+2020-08-16 15:57:14,987: INFO: UNSPLASH: Making a request to: https://api.unsplash.com/photos/random/?client_id=0OkiBEpNR1xpPpD36K8zth4F0THEv-9vBYmOfF_CgaM&count=1
+2020-08-16 15:57:16,743: INFO: UNSPLASH: All done, returning response
+2020-08-16 15:57:16,744: INFO: UNSPLASH: Received 1 images from API.
