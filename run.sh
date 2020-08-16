@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source setup.sh
+source dummy_setup.sh
 
 ./bot.py
 
