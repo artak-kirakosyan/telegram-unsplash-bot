@@ -88,7 +88,8 @@ def get_random(update: Update, context: CallbackContext):
 
 def main():
 
-    __TG_TOKEN = os.getenv("TG_TOKEN")
+    #__TG_TOKEN = os.getenv("TG_TOKEN")
+    __TG_TOKEN = "1191619905:AAFPOxGzqiGRaCFwMu-sqg8KkjgZLP3Z4xo"
     req = Request(
             connect_timeout=5,
             )
