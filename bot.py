@@ -114,7 +114,7 @@ def main():
     updater.dispatcher.add_handler(help_handler)
 
     #updater.start_polling()
-    updater.start_webhook(listen="0.0.0.",
+    updater.start_webhook(listen="0.0.0.0",
             port=PORT,
             url_path=__TG_TOKEN,
             )
