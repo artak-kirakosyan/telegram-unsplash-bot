@@ -26,6 +26,7 @@ logger = get_logger(
         file_name="logs/bot.log",
         )
 unsplash_client = UnsplashClient("configuration.json")
+PORT = int(os.environ.get('PORT', 5000))
 
 
 def log_error(func):
@@ -42,9 +43,10 @@ def log_error(func):
 
 @log_error
 def do_help(update: Update, context: CallbackContext):
-    reply = "My purpose is to inform you about the flights you are interested in.\
-            \nYou can create alerts on flights using the /add_alert command.\
-            \nType /add_alert to get started."
+    reply = "I am designed to send amazing pictures from Unsplash to you.\
+            \nHit /random to get one or /random n to get n images.\
+            \n Keep in mind tha the maximum is 5.\
+            \nPlease ba patient and do not exhaust the bot :)."
     update.message.reply_text(
             text=reply,
     )
@@ -111,7 +113,12 @@ def main():
     updater.dispatcher.add_handler(start_handler)
     updater.dispatcher.add_handler(help_handler)
 
-    updater.start_polling()
+    #updater.start_polling()
+    updater.start_webhook(listen="0.0.0.",
+            port=PORT,
+            url_path=__TG_TOKEN,
+            )
+    updater.bot.setWebhook('https://unsplash-bot.herokuapp.com/' + __TG_TOKEN)
     updater.idle()
     print("Done, quitting")
 
