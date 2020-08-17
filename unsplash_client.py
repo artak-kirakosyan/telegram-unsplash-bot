@@ -172,7 +172,7 @@ class UnsplashThread(Thread):
 
     def run(self):
         try:
-            images = self._unsplash_client._get_n_random_images(self._num_of_images)
+            self._images = self._unsplash_client._get_n_random_images(self._num_of_images)
         except RuntimeError:
             self._bot.send_message(
                     chat_id=self._chat_id,
@@ -180,8 +180,10 @@ class UnsplashThread(Thread):
                             \nPlease come back in about an hour.",
                             )
             return
-        for img in images:
-            if img["alt_description"] is not None:
+        for img in self._images:
+            if img["description"] is not None:
+                description = img["description"]
+            elif img["alt_description"] is not None:
                 description = img["alt_description"]
             num_views = img['views']
             num_of_likes = img['likes']
@@ -190,7 +192,7 @@ class UnsplashThread(Thread):
             user_url = img['user']['links']['html']
             preview_url = img['urls']['small']
             url = img['links']['html']
-            
+            download_link = img['urls']['full']
             reply_text = ""
             reply_text += f'<a href="{preview_url}">&#8205</a>'
             reply_text += f'An <a href="{url}"><b>amazing photo</b></a> '
@@ -200,6 +202,7 @@ class UnsplashThread(Thread):
             reply_text += f'\nIt was liked by <b>{num_of_likes}</b> users,'
             reply_text += f' downloaded <b>{num_of_downloads}</b> times'
             reply_text += f' and viewed <b>{num_views}</b> times.'
+            reply_text += f' <a href="{download_link}">Click to download</a>.'
             self._bot.send_message(
                     chat_id=self._chat_id,
                     text=reply_text,
