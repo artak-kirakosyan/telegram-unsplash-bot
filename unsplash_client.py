@@ -181,13 +181,25 @@ class UnsplashThread(Thread):
                             )
             return
         for img in images:
-            user_name = img['user']['name']
-            user_url = img['user']['links']['html']
-            url = img['links']['html']
+            if img["alt_description"] is not None:
+                description = img["alt_description"]
+            num_views = img['views']
             num_of_likes = img['likes']
             num_of_downloads = img['downloads']
-            reply_text = f'An <a href="{url}">amazing photo</a> from <a href="{user_url}">{user_name}</a>.'
-            reply_text += f'\nIt was liked by {num_of_likes} users, and downloaded {num_of_downloads} times'
+            user_name = img['user']['name']
+            user_url = img['user']['links']['html']
+            preview_url = img['urls']['small']
+            url = img['links']['html']
+            
+            reply_text = ""
+            reply_text += f'<a href="{preview_url}">&#8205</a>'
+            reply_text += f'An <a href="{url}"><b>amazing photo</b></a> '
+            if description is not None:
+                reply_text += f'called <i>"{description}</i> '
+            reply_text += f'from <a href="{user_url}"><b>{user_name}</></a>.'
+            reply_text += f'\nIt was liked by <b>{num_of_likes}</b> users,'
+            reply_text += f' downloaded <b>{num_of_downloads}</b> times'
+            reply_text += f' and viewed <b>{num_views}</b> times.'
             self._bot.send_message(
                     chat_id=self._chat_id,
                     text=reply_text,
