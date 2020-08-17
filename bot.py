@@ -26,7 +26,6 @@ logger = get_logger(
         file_name="logs/bot.log",
         )
 unsplash_client = UnsplashClient("configuration.json")
-PORT = int(os.environ.get('PORT', 5000))
 
 
 def log_error(func):
@@ -43,10 +42,9 @@ def log_error(func):
 
 @log_error
 def do_help(update: Update, context: CallbackContext):
-    reply = "I am designed to send amazing pictures from Unsplash to you.\
-            \nHit /random to get one or /random n to get n images.\
-            \n Keep in mind tha the maximum is 5.\
-            \nPlease ba patient and do not exhaust the bot :)."
+    reply = "I am designed to send awesome pictures from Unsplash.\
+            \nHit /random to get one image or /random n to get n images.\
+            \nPlease note that I cant send more than 5 at once :/"
     update.message.reply_text(
             text=reply,
     )
@@ -86,10 +84,23 @@ def get_random(update: Update, context: CallbackContext):
     thr.start()
 
 
+@log_error
+def do_not_understand(update: Update, context: CallbackContext):
+    if not hasattr(update, "message"):
+        return
+    if not hasattr(update.message, "text"):
+        return
+
+    reply = f"Hmm, not sure if I get you right :/\
+            \nHit /random to get a random image."
+    update.effective_message.reply_text(
+            text=reply,
+            )
+
+
 def main():
 
-    #__TG_TOKEN = os.getenv("TG_TOKEN")
-    __TG_TOKEN = "1191619905:AAFPOxGzqiGRaCFwMu-sqg8KkjgZLP3Z4xo"
+    __TG_TOKEN = os.getenv("TG_TOKEN")
     req = Request(
             connect_timeout=5,
             )
@@ -109,17 +120,14 @@ def main():
     random_handler = CommandHandler("random", get_random)
     help_handler = CommandHandler("help", do_help)
     start_handler = CommandHandler("start", do_start)
-    
+    dont_understand_handler = MessageHandler(Filters.all, do_not_understand) 
+
     updater.dispatcher.add_handler(random_handler)
     updater.dispatcher.add_handler(start_handler)
     updater.dispatcher.add_handler(help_handler)
+    updater.dispatcher.add_handler(dont_understand_handler)
 
-    #updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",
-            port=PORT,
-            url_path=__TG_TOKEN,
-            )
-    updater.bot.setWebhook('https://unsplash-bot.herokuapp.com/' + __TG_TOKEN)
+    updater.start_polling()
     updater.idle()
     print("Done, quitting")
 

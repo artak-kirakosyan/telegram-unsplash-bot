@@ -190,7 +190,7 @@ class UnsplashThread(Thread):
             num_of_downloads = img['downloads']
             user_name = img['user']['name']
             user_url = img['user']['links']['html']
-            preview_url = img['urls']['small']
+            preview_url = img['urls']['regular']
             url = img['links']['html']
             download_link = img['urls']['full']
             reply_text = ""
