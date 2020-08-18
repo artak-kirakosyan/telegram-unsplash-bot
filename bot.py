@@ -2,14 +2,20 @@
 try:
     import os
     from datetime import datetime
+    from uuid import uuid4
 
+    from telegram import ParseMode
     from telegram import Update
+    from telegram import InlineQueryResultArticle
+    from telegram import InputTextMessageContent
+    from telegram.ext import InlineQueryHandler
     from telegram.ext import Updater
     from telegram.ext import Filters
     from telegram.ext import CallbackContext
     from telegram.ext import MessageHandler
     from telegram.ext import CommandHandler
     from telegram.utils.request import Request
+    from telegram.utils.helpers import escape_markdown
     from telegram import Bot
 
     from unsplash_client import UnsplashClient, UnsplashThread
@@ -35,7 +41,7 @@ def log_error(func):
             return func(*args, **kwargs)
             logger.info(f"Finished function {func.__name__}")
         except Exception as e:
-            logger.exception("Exception during {func.__name__} call: {e}")
+            logger.exception(f"Exception during {func.__name__} call: {e}")
             raise e
     return inner
 
@@ -98,9 +104,36 @@ def do_not_understand(update: Update, context: CallbackContext):
             )
 
 
-def main():
+@log_error
+def inlinequery(update, context):
+    """Handle the inline query."""
+    results = []
+    
+    results = [
+        InlineQueryResultArticle(
+            id=0,
+            title="Caps",
+            input_message_content=InputTextMessageContent(
+                query.upper())),
+        InlineQueryResultArticle(
+            id=1,
+            title="Bold",
+            input_message_content=InputTextMessageContent(
+                "<b>{}</b>".format(escape_markdown(query)),
+                parse_mode=ParseMode.HTML)),
+        InlineQueryResultArticle(
+            id=2,
+            title="Italic",
+            input_message_content=InputTextMessageContent(
+                "<i>{}</i>".format(escape_markdown(query)),
+                parse_mode=ParseMode.HTML))]
 
+    update.inline_query.answer(results)
+
+
+def setup_updater():
     __TG_TOKEN = os.getenv("TG_TOKEN")
+
     req = Request(
             connect_timeout=5,
             )
@@ -114,19 +147,26 @@ def main():
             use_context=True,
             )
     bot_getme = updater.bot.get_me()
-
+    dp = updater.dispatcher
     print(f"Bot {bot_getme.first_name} is live now") 
 
     random_handler = CommandHandler("random", get_random)
     help_handler = CommandHandler("help", do_help)
     start_handler = CommandHandler("start", do_start)
     dont_understand_handler = MessageHandler(Filters.all, do_not_understand) 
+    inline_handler = InlineQueryHandler(inlinequery)
 
-    updater.dispatcher.add_handler(random_handler)
-    updater.dispatcher.add_handler(start_handler)
-    updater.dispatcher.add_handler(help_handler)
-    updater.dispatcher.add_handler(dont_understand_handler)
+    dp.add_handler(random_handler)
+    dp.add_handler(start_handler)
+    dp.add_handler(help_handler)
+    dp.add_handler(dont_understand_handler)
+    dp.add_handler(inline_handler)
 
+    return updater
+
+
+def main():
+    updater = setup_updater()
     updater.start_polling()
     updater.idle()
     print("Done, quitting")

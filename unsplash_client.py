@@ -11,6 +11,8 @@ except ImportError as e:
     print(f'Error occured during import: {e}')
     print('Please install all necessary libraries and try again')
     exit(1)
+
+
 class UnsplashClient():
     def __init__(self, config_path):
         with open(config_path, "r") as f:
@@ -94,67 +96,8 @@ class UnsplashClient():
             self._logger.exception("Error occured during the request")
             raise e
         self._logger.info(f"Received {len(images)} images from API.")
-        #cleaned_images = self._process_the_response(images)
-        #self._logger.info("Preprocessing done, returning results")
         return images
     
-    def _process_the_response(self, images):
-        """
-        Process and prepare clean image documents from JSON response.
-
-        Arguments:
-            images: list of JSON results from the API
-        Return:
-            images_cleaned: processed images
-        """
-        images_cleaned = []
-        # Process images
-        for image in images:
-            curr_image = {}
-            invalid_response = False
-            for key, vals in self._configs["feature_names"].items():
-                # If key is id, make the _id field for MongoDB
-                if key == "_id":
-                    try:
-                        curr_image[key] = f"unsplash_{image[vals['feature_name']]}"
-                    except KeyError as e:
-                        self._logger.exception(f"Current feature not found: {vals}")
-                        # If the key is mandatory and there was an error, mark as invalid
-                        if vals['is_mandatory']:
-                            invalid_response = True
-                # For URI, the processing is different
-                elif key == "uri":
-                    try:
-                        feature_1, feature_2 = vals['feature_name'].split("/")
-                        curr_image[key] = image[feature_1][feature_2]
-                    except KeyError as e:
-                        self._logger.exception(f"Current feature not found: {vals}")
-                        if vals['is_mandatory']:
-                            invalid_response = True
-                else:
-                    # For other types, check if its a date, else just store 
-                    try:
-                        if vals['is_date']:
-                            curr_image[key] = datetime.strptime(
-                                    image[vals['feature_name']][:-6], 
-                                    self._configs['datetime_format']
-                                    )
-                        else:
-                            curr_image[key] = image[vals['feature_name']]
-                    except KeyError as e:
-                        self._logger.exception(f"Current feature not found: {vals}")
-                        if vals['is_mandatory']:
-                            invalid_response = True
-                    except ValueError as e:
-                        self._logger.exception(f"Invalid datetime obect:{vals}")
-                        if vals['is_mandatory']:
-                            invalid_response = True
-            # If current image is valid, store it
-            if not invalid_response:
-                images_cleaned.append(curr_image)
-        self._logger.info(f"Returning {len(images_cleaned)} cleaned images.")
-        return images_cleaned
-
 
 class UnsplashThread(Thread):
     def __init__(
@@ -177,32 +120,12 @@ class UnsplashThread(Thread):
             self._bot.send_message(
                     chat_id=self._chat_id,
                     text="Unfortunately the limit to Unsplash API has been exhausted :/\
-                            \nPlease come back in about an hour.",
+                            \nPlease come back in about an hour or so.",
                             )
             return
+  
         for img in self._images:
-            if img["description"] is not None:
-                description = img["description"]
-            elif img["alt_description"] is not None:
-                description = img["alt_description"]
-            num_views = img['views']
-            num_of_likes = img['likes']
-            num_of_downloads = img['downloads']
-            user_name = img['user']['name']
-            user_url = img['user']['links']['html']
-            preview_url = img['urls']['regular']
-            url = img['links']['html']
-            download_link = img['urls']['full']
-            reply_text = ""
-            reply_text += f'<a href="{preview_url}">&#8205</a>'
-            reply_text += f'An <a href="{url}"><b>amazing photo</b></a> '
-            if description is not None:
-                reply_text += f'called <i>"{description}</i> '
-            reply_text += f'from <a href="{user_url}"><b>{user_name}</></a>.'
-            reply_text += f'\nIt was liked by <b>{num_of_likes}</b> users,'
-            reply_text += f' downloaded <b>{num_of_downloads}</b> times'
-            reply_text += f' and viewed <b>{num_views}</b> times.'
-            reply_text += f' <a href="{download_link}">Click to download</a>.'
+            reply_text = self.create_reply(img)
             self._bot.send_message(
                     chat_id=self._chat_id,
                     text=reply_text,
@@ -210,3 +133,33 @@ class UnsplashThread(Thread):
                     disable_web_page_preview=False)
             time.sleep(1.4)
 
+    def create_reply(self, img):
+        if img["description"] is not None:
+            description = img["description"]
+        elif img["alt_description"] is not None:
+            description = img["alt_description"]
+
+        num_views = img['views']
+        num_of_likes = img['likes']
+        num_of_downloads = img['downloads']
+        user_name = img['user']['name']
+        user_url = img['user']['links']['html']
+
+        preview_url = img['urls']['regular']
+        url = img['links']['html']
+        download_link = img['urls']['full']
+
+        reply_text = ""
+        reply_text += f'<a href="{preview_url}">&#8205</a>'
+        reply_text += f'An <a href="{url}"><b>amazing photo</b></a> '
+
+        if description is not None:
+            reply_text += f'called <i>"{description}"</i> '
+
+        reply_text += f'from <a href="{user_url}"><b>{user_name}</></a>.'
+        reply_text += f'\nIt was liked by <b>{num_of_likes}</b> users,'
+        reply_text += f' downloaded <b>{num_of_downloads}</b> times'
+        reply_text += f' and viewed <b>{num_views}</b> times.'
+        reply_text += f' <a href="{download_link}">Click to download</a>.'
+
+        return reply_text
